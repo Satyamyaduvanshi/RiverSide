@@ -1,0 +1,20 @@
+
+syntax = "proto3";
+
+package auth;
+
+
+service authService{
+    rpc registerUser(userData) returns (returnUserData);
+
+}
+
+message returnUserData {
+    string response = 1;
+}
+
+message userData{
+    string name = 1;
+    string email = 2;
+    string password = 3;
+}

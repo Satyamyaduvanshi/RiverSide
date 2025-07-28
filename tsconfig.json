@@ -4,37 +4,13 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/api-gateway-e2e"
-    },
-    {
       "path": "./apps/api-gateway"
-    },
-    {
-      "path": "./apps/auth-e2e"
     },
     {
       "path": "./apps/auth"
     },
     {
-      "path": "./apps/User-e2e"
-    },
-    {
       "path": "./apps/User"
-    },
-    {
-      "path": "./packages"
-    },
-    {
-      "path": "./packages"
-    },
-    {
-      "path": "./packages"
-    },
-    {
-      "path": "./packages"
-    },
-    {
-      "path": "./packages/prisma"
     }
   ]
 }
