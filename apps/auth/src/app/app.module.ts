@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import jwtConfig from './config/jwt.config';
+import refreashConfig from './config/refresh.config';
 //import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -11,12 +13,9 @@ import { JwtModule } from '@nestjs/jwt';
     isGlobal:true,
     expandVariables:true
   }),
-  JwtModule.register({
-    secret: "jwt-operation",
-    signOptions:{
-      expiresIn: "1h"
-    }
-  })
+  JwtModule.registerAsync(jwtConfig.asProvider()),
+  ConfigModule.forFeature(jwtConfig),
+  ConfigModule.forFeature(refreashConfig)
 ],
   controllers: [AppController],
   providers: [AppService],

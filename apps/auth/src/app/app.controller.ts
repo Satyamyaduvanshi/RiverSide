@@ -9,6 +9,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
 
+
   @MessagePattern('auth-createUser')
   async createUser(@Payload() userData:CreateUserDto){
     return this.appService.createUser(userData)
@@ -18,7 +19,8 @@ export class AppController {
 
   @MessagePattern("auth-loginUser")
   async login(@Payload() userData:LoginUserDto){
-    return this.appService.login(userData)
+    const {id,name} = await this.appService.validateUser(userData)
+    return this.appService.login(id,name)
   }
 
   

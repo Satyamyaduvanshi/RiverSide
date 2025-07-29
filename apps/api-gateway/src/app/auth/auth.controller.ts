@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Inject, Post } from '@nestjs/common';
 import { MICROSERVICE } from '../../constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,5 +17,10 @@ export class AuthController {
     @Post('login')
     async login(@Body() body:LoginUserDto){
         return this.authServiceClient.send("auth-loginUser",body)
+    }
+
+    @Post('logout')
+    async logout(@Headers('Authorization') token:string){
+        return this.authServiceClient.send("auth-logout",token)
     }
 }
