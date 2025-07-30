@@ -8,14 +8,10 @@ import { LoginUserDto } from './dto/login-user.dto';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-
-
   @MessagePattern('auth-createUser')
   async createUser(@Payload() userData:CreateUserDto){
     return this.appService.createUser(userData)
   }
-
-  
 
   @MessagePattern("auth-loginUser")
   async login(@Payload() userData:LoginUserDto){
@@ -23,5 +19,14 @@ export class AppController {
     return this.appService.login(id,name)
   }
 
+  @MessagePattern("auth_logout")
+  async logout(@Payload() userId:string){
+    return this.appService.logout(userId)
+  }
+
+  @MessagePattern("validate-token")
+  async validateToken(@Payload() token:string){
+    return this.appService.validateToken(token)
+  }
   
 }

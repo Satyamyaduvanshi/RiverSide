@@ -19,15 +19,16 @@ export class AppService {
     private refreshTokenConfig: config.ConfigType<typeof refreshConfig>,
   ){}
 
-  
+  //create user
   async createUser(userData: CreateUserDto) {
     const emailMatch = await this.findUserByEmail(userData.email);
     if (emailMatch) {
         throw new ConflictException('User with this email already exists');
     }
     return this.create(userData);
-}
+  }
 
+  // login user
   async login(userId:string,name:string) {
     const {accessToken,refreshToken} = await this.generateToken(userId)
     const hashRfT = await hash(refreshToken)
@@ -38,6 +39,12 @@ export class AppService {
       accessToken,
       refreshToken
     }
+  }
+
+  //logout user
+  logout(userId: string) {
+    this.updateRefreshToken(userId, "")
+    return {message: "user logout"}
   }
 
 // user funcation's
@@ -102,6 +109,15 @@ export class AppService {
     return {
       accessToken,
       refreshToken
+    }
+  }
+
+  async validateToken(token:string){
+    try {
+       const decode:authJwtPayload = this.jwtService.verify(token)
+       return {valid: true , userId: decode.sub}
+    } catch (err) {
+      return { valid:false, userId: null}
     }
   }
 
