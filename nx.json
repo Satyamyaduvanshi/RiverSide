@@ -29,7 +29,7 @@
           "watchDepsName": "watch-deps"
         }
       },
-      "exclude": ["packages/*", "packages/prisma/*"]
+      "exclude": ["packages/*", "packages/prisma/*", "prisma/*"]
     },
     {
       "plugin": "@nx/webpack/plugin",
@@ -60,7 +60,7 @@
     },
     {
       "plugin": "@nx/js/typescript",
-      "include": ["packages/*", "packages/prisma/*"],
+      "include": ["packages/*", "packages/prisma/*", "prisma/*"],
       "options": {
         "typecheck": {
           "targetName": "typecheck"
@@ -73,6 +73,4 @@
       "dependsOn": ["^build"]
     }
   }
-  
 }
-
