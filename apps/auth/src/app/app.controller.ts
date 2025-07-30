@@ -19,7 +19,7 @@ export class AppController {
     return this.appService.login(id,name)
   }
 
-  @MessagePattern("auth_logout")
+  @MessagePattern("auth-logout")
   async logout(@Payload() userId:string){
     return this.appService.logout(userId)
   }
@@ -27,6 +27,11 @@ export class AppController {
   @MessagePattern("validate-token")
   async validateToken(@Payload() token:string){
     return this.appService.validateToken(token)
+  }
+
+  @MessagePattern("auth-refreshtoken")
+  async refreshToken(@Payload() token:string){
+    return this.appService.refreshTokenRotation(token)
   }
   
 }

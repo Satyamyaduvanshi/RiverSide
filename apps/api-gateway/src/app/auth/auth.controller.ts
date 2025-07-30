@@ -1,8 +1,9 @@
-import { Body, Controller, Headers, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Inject, Post, Req, UseGuards } from '@nestjs/common';
 import { MICROSERVICE } from '../../constant';
 import { ClientProxy } from '@nestjs/microservices';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import { AuthGuard } from '../../guards/auth/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -19,8 +20,15 @@ export class AuthController {
         return this.authServiceClient.send("auth-loginUser",body)
     }
 
+    @UseGuards(AuthGuard)
     @Post('logout')
-    async logout(@Headers('Authorization') token:string){
-        return this.authServiceClient.send("auth-logout",token)
+    async logout(@Req() req){
+        const userId = req.user.userId
+        return this.authServiceClient.send("auth-logout",userId)
+    }
+
+    @Post('refresh')
+    async refreshToken(@Body() body:{ refreshToken: string}){
+        return this.authServiceClient.send("auth-refreshtoken",body.refreshToken)
     }
 }

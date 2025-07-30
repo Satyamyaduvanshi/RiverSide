@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from './prisma/prisma.service';
 //import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -43,8 +43,26 @@ export class AppService {
 
   //logout user
   logout(userId: string) {
-    this.updateRefreshToken(userId, "")
+    this.updateRefreshToken(userId, null)
     return {message: "user logout"}
+  }
+
+  //refresh token
+
+  async refreshTokenRotation(token: string) {
+
+    try {
+      const {sub} = await this.jwtService.verify(token)
+      const user = await this.findById(sub)
+      if(!user || !user.refreshToken ) throw new UnauthorizedException("")
+      const isMatch = await verify(user.refreshToken,token)
+      if(isMatch) throw new UnauthorizedException("token mismatch");
+      return this.login(user.id,user.firstName)
+      
+    } catch (err) {
+      throw new UnauthorizedException("invalid refresh token")
+    }
+
   }
 
 // user funcation's
@@ -120,5 +138,7 @@ export class AppService {
       return { valid:false, userId: null}
     }
   }
+
+
 
 }
