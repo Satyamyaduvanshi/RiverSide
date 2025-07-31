@@ -1,6 +1,5 @@
 import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from './prisma/prisma.service';
-//import { JwtService } from '@nestjs/jwt';
+//import { PrismaService } from '@river-side/prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hash, verify } from 'argon2';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -8,6 +7,8 @@ import { authJwtPayload } from './types/jwt-plyload.types';
 import { JwtService } from '@nestjs/jwt';
 import refreshConfig from './config/refresh.config';
 import * as config from '@nestjs/config';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { PrismaService } from '../../../../packages/prisma/src';
 
 @Injectable()
 export class AppService {
@@ -49,21 +50,24 @@ export class AppService {
 
   //refresh token
 
-  async refreshTokenRotation(token: string) {
-
-    try {
-      const {sub} = await this.jwtService.verify(token)
-      const user = await this.findById(sub)
-      if(!user || !user.refreshToken ) throw new UnauthorizedException("")
-      const isMatch = await verify(user.refreshToken,token)
-      if(isMatch) throw new UnauthorizedException("token mismatch");
-      return this.login(user.id,user.firstName)
-      
-    } catch (err) {
-      throw new UnauthorizedException("invalid refresh token")
+ async refreshTokenRotation(token: string) {
+  try {
+    const { sub } = this.jwtService.verify(token, {
+      secret: this.refreshTokenConfig.secret,
+    });
+    const user = await this.findById(sub);
+    if (!user || !user.refreshToken) {
+      throw new UnauthorizedException('Access Denied');
     }
-
+    const isMatch = await verify(user.refreshToken, token);
+    if (!isMatch) {
+      throw new UnauthorizedException('Refresh token not matched');
+    }
+    return this.login(user.id, user.firstName);
+  } catch (err) {
+    throw new UnauthorizedException('Invalid or expired refresh token');
   }
+}
 
 // user funcation's
   async findUserByEmail(email:string){

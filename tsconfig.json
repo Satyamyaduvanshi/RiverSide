@@ -13,7 +13,7 @@
       "path": "./apps/User"
     },
     {
-      "path": "./prisma"
+      "path": "./packages/prisma"
     }
   ]
 }

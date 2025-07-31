@@ -25,7 +25,7 @@ export class AuthController {
         res.cookie('refresh-token',token.refreshToken,{
             httpOnly:true,
             secure: process.env.NODE_ENV !== 'development',
-            path: '/auth/refresh',
+            path: '/',
             expires: new Date(Date.now()+ 7 * 24 * 60 * 60 * 1000)
         })
 
@@ -34,8 +34,13 @@ export class AuthController {
 
     @UseGuards(AuthGuard)
     @Post('logout')
-    async logout(@User() user:{userId:string}) {
-        const userId = user.userId; 
+    async logout(@User() user:{userId:string},@Res({passthrough:true}) res:express.Response) {
+        const userId = user.userId;
+        res.clearCookie('refresh-token', {
+            httpOnly: true,
+            path: '/',
+            secure: process.env.NODE_ENV !== 'development',
+        }); 
         return this.authServiceClient.send("auth-logout", userId);
     }
 
@@ -48,7 +53,7 @@ export class AuthController {
         res.cookie('refresh-token',token.refreshToken,{
             httpOnly:true,
             secure: process.env.NODE_ENV !== 'development',
-            path: '/auth/refresh',
+            path: '/',
             expires: new Date(Date.now()+ 7 * 24 * 60 * 60 * 1000)
         })
         return {accessTokoen: token.accessToken}

@@ -19,6 +19,8 @@
     "strictPropertyInitialization": false,
     "target": "es2022",
     "customConditions": ["development"],
-   
+   "paths": {
+    "@river-side/prisma": ["packages/prisma/dist"]
+    }
   }
 }

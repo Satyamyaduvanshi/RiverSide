@@ -28,7 +28,7 @@
     "jest-environment-node": "^29.7.0",
     "nx": "21.2.2",
     "prettier": "^2.6.2",
-    "prisma": "^6.11.1",
+    "prisma": "*",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
@@ -39,9 +39,11 @@
   "workspaces": [
     "packages/*",
     "apps/*",
-    "packages",
-    "prisma"
+    "packages"
   ],
+  "prisma": {
+    "schema": "packages/prisma/src/lib/schema.prisma"
+  },
   "dependencies": {
     "@grpc/grpc-js": "^1.13.4",
     "@grpc/proto-loader": "^0.7.15",
@@ -56,6 +58,7 @@
     "class-validator": "^0.14.2",
     "reflect-metadata": "^0.1.14",
     "rxjs": "^7.8.0",
-    "ts-proto": "^2.7.5"
+    "ts-proto": "^2.7.5",
+    "tsconfig-paths-webpack-plugin": "^4.2.0"
   }
 }

@@ -1,9 +1,10 @@
 const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
 const { join } = require('path');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
   output: {
-    path: join(__dirname, 'dist'),
+    path: join(__dirname, '../../dist/apps/auth'),
   },
   plugins: [
     new NxAppWebpackPlugin({
@@ -17,4 +18,12 @@ module.exports = {
       generatePackageJson: true,
     }),
   ],
+  resolve: {
+    plugins: [
+      new TsconfigPathsPlugin({
+        // Add this configFile option
+        configFile: join(__dirname, '../../tsconfig.base.json'),
+      }),
+    ],
+  },
 };

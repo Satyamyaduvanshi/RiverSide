@@ -28,8 +28,7 @@
           "buildDepsName": "build-deps",
           "watchDepsName": "watch-deps"
         }
-      },
-      "exclude": ["packages/*", "packages/prisma/*", "prisma/*"]
+      }
     },
     {
       "plugin": "@nx/webpack/plugin",
@@ -72,5 +71,17 @@
     "test": {
       "dependsOn": ["^build"]
     }
+  },
+  "projects": {
+  "auth": {
+    "targets": {
+      "build": {
+        "options": {
+          "generatePackageJson": true,
+          "externalDependencies": "none"
+        }
+      }
+    }
   }
+}
 }

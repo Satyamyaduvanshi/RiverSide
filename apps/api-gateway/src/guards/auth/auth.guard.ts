@@ -13,15 +13,16 @@ export class AuthGuard implements CanActivate {
   ): Promise<boolean> {
     
     const req = await context.switchToHttp().getRequest()
-    const authHeader = req.Headers["authorization"] as string
+    const authHeader = req.headers["authorization"] as string;
     if(!authHeader) throw new UnauthorizedException("missing token!")
     const token = authHeader.split(" ")[1];
 
     const response = await firstValueFrom( this.authClient.send("validate-token",token))
 
     if(!response.valid) throw new UnauthorizedException("Invalid token")
-
+      console.log("userId:(auth Guard) ",response.userId)
     req.user = {userId: response.userId}
+    
 
     return true
   } 
