@@ -3,7 +3,7 @@ const { join } = require('path');
 
 module.exports = {
   output: {
-    path: join(__dirname, 'dist'),
+    path: join(__dirname, '../dist/apps/user'),
   },
   plugins: [
     new NxAppWebpackPlugin({
@@ -17,4 +17,11 @@ module.exports = {
       generatePackageJson: true,
     }),
   ],
+   resolve: {
+    plugins: [
+      new TsconfigPathsPlugin({
+        configFile: join(__dirname, '../../tsconfig.base.json'),
+      }),
+    ],
+  },
 };

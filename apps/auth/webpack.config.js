@@ -21,7 +21,6 @@ module.exports = {
   resolve: {
     plugins: [
       new TsconfigPathsPlugin({
-        // Add this configFile option
         configFile: join(__dirname, '../../tsconfig.base.json'),
       }),
     ],

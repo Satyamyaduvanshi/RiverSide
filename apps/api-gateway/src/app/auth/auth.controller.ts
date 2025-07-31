@@ -11,11 +11,15 @@ import { User } from './decorator/user.decorator';
 @Controller('auth')
 export class AuthController {
 
-    constructor(@Inject(MICROSERVICE.auth) private  authServiceClient:ClientProxy){}
+    constructor(@Inject(MICROSERVICE.auth) private readonly authServiceClient:ClientProxy){}
 
     @Post('signup')
     async createUser(@Body() body:CreateUserDto){
-        return this.authServiceClient.send('auth-createUser',body)
+        const user = await firstValueFrom( this.authServiceClient.send('auth-createUser',body))
+        return {
+            message: "user created",
+            name: user.name
+        }
     }
 
     @Post('login')

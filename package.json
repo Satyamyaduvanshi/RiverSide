@@ -2,7 +2,9 @@
   "name": "@river-side/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "proto:user": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./ --ts_proto_opt=nestJs=true ./proto/user.proto"
+  },
   "private": true,
   "devDependencies": {
     "@eslint/js": "^9.8.0",
@@ -31,6 +33,7 @@
     "prisma": "*",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",
+    "ts-proto": "^2.7.5",
     "tslib": "^2.3.0",
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.29.0",
@@ -58,7 +61,6 @@
     "class-validator": "^0.14.2",
     "reflect-metadata": "^0.1.14",
     "rxjs": "^7.8.0",
-    "ts-proto": "^2.7.5",
     "tsconfig-paths-webpack-plugin": "^4.2.0"
   }
 }

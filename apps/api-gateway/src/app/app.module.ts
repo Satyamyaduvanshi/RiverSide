@@ -15,6 +15,14 @@ import { UserController } from './user/user.controller';
       host:"127.0.0.1",
       port:8877
     }
+    },
+    {
+      name:MICROSERVICE.user,
+      transport: Transport.TCP,
+      options:{
+      host:"127.0.0.1",
+      port:3002
+      }
     }
 ])],
   controllers: [AppController, AuthController, UserController],

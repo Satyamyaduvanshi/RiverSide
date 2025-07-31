@@ -28,7 +28,7 @@ async function bootstrap() {
   await app.listen();
   
   Logger.log(
-    `🚀AUTH Application is running TCP port 8877`
+    `🚀AUTH Application is running TCP port 8877 `
   );
 }
 
