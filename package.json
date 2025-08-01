@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "proto:user": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./ --ts_proto_opt=nestJs=true ./proto/user.proto"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate"
   },
   "private": true,
   "devDependencies": {
@@ -13,11 +14,11 @@
     "@nx/eslint": "21.2.2",
     "@nx/eslint-plugin": "21.2.2",
     "@nx/jest": "21.2.2",
-    "@nx/js": "21.2.2",
-    "@nx/nest": "^21.2.2",
-    "@nx/node": "21.2.2",
+    "@nx/js": "21.3.10",
+    "@nx/nest": "21.3.10",
+    "@nx/node": "21.3.10",
     "@nx/web": "21.2.2",
-    "@nx/webpack": "21.2.2",
+    "@nx/webpack": "21.3.10",
     "@swc-node/register": "~1.9.1",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",

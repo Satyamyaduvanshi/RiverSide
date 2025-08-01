@@ -1,33 +1,23 @@
 
-import { Logger, ValidationPipe } from '@nestjs/common';
+
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-
+import {MicroserviceOptions, Transport} from "@nestjs/microservices"
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule,{
     transport: Transport.TCP,
     options:{
       host:"127.0.0.1",
-      port:8877
+      port:3003
     }
   });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  )
-
   await app.listen();
-  
   Logger.log(
-    `🚀AUTH Application is running TCP port 8877 `
+    `🚀 Studio service is running on: 3003 `
   );
 }
 
 bootstrap();
-
-
