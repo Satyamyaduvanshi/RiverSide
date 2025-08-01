@@ -55,7 +55,10 @@
         "apps/api-gateway-e2e/**/*",
         "apps/auth-e2e/**/*",
         "apps/User-e2e/**/*",
-        "apps/studio-e2e/**/*"
+        "apps/studio-e2e/**/*",
+        "recording-e2e/**/*",
+        "apps/recording-e2e/**/*",
+        "apps/recording-e2e/**/*"
       ]
     },
     {

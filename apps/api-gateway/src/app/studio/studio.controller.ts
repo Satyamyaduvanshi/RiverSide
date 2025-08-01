@@ -2,7 +2,7 @@ import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { MICROSERVICE } from '../../constant';
 import { AuthGuard } from '../../guards/auth/auth.guard';
-import { User } from './decorator/user.decorator';
+import { User } from '../../decorator/user.decorator';
 import { CreateStudioDto } from './dto/createStudio.dto';
 
 @Controller('studio')

@@ -6,6 +6,7 @@ import { AuthController } from './auth/auth.controller';
 import { MICROSERVICE } from '../constant';
 import { UserController } from './user/user.controller';
 import { StudioController } from './studio/studio.controller';
+import { RecordingController } from './recording/recording.controller';
 
 @Module({
   imports: [ClientsModule.register([
@@ -29,12 +30,17 @@ import { StudioController } from './studio/studio.controller';
       name:MICROSERVICE.studio,
       transport: Transport.TCP,
       options:{
-        host:"127.O.O.1",
+        host:"127.0.0.1",
         port:3003
-      }
-    }
+      },
+    },
+    {
+      name: MICROSERVICE.recording, 
+      transport: Transport.TCP,
+      options: { host: 'localhost', port: 3004 },
+    },
 ])],
-  controllers: [AppController, AuthController, UserController, StudioController],
+  controllers: [AppController, AuthController, UserController, StudioController, RecordingController],
   providers: [AppService],
 })
 export class AppModule {}

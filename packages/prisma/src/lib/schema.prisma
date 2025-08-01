@@ -41,6 +41,7 @@ model Studio {
   ownerId      String
 
   participants Participant[]
+  recordings   Recording[]
 
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -59,8 +60,26 @@ model Participant {
   joinedAt DateTime        @default(now())
   leftAt   DateTime?
 
+  recordings   Recording[]
+
   @@unique([studioId, userId])
 }
+
+model Recording {
+  id            String    @id @default(uuid())
+  filePath      String
+  fileType      String 
+  fileSize      Int 
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+
+  studio        Studio      @relation(fields: [studioId], references: [id])
+  studioId      String
+
+  participant   Participant @relation(fields: [participantId], references: [id])
+  participantId String
+}
+
 
 enum ParticipantRole {
   HOST
