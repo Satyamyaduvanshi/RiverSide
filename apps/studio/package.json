@@ -1,0 +1,45 @@
+{
+  "name": "@river-side/studio",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "webpack-cli build",
+          "args": [
+            "--node-env=production"
+          ]
+        },
+        "configurations": {
+          "development": {
+            "args": [
+              "--node-env=development"
+            ]
+          }
+        }
+      },
+      "serve": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "@river-side/studio:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@river-side/studio:build:development"
+          },
+          "production": {
+            "buildTarget": "@river-side/studio:build:production"
+          }
+        }
+      }
+    }
+  }
+}

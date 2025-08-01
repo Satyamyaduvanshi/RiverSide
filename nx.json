@@ -54,7 +54,8 @@
       "exclude": [
         "apps/api-gateway-e2e/**/*",
         "apps/auth-e2e/**/*",
-        "apps/User-e2e/**/*"
+        "apps/User-e2e/**/*",
+        "apps/studio-e2e/**/*"
       ]
     },
     {
@@ -73,15 +74,15 @@
     }
   },
   "projects": {
-  "auth": {
-    "targets": {
-      "build": {
-        "options": {
-          "generatePackageJson": true,
-          "externalDependencies": "none"
+    "auth": {
+      "targets": {
+        "build": {
+          "options": {
+            "generatePackageJson": true,
+            "externalDependencies": "none"
+          }
         }
       }
     }
   }
-}
 }
