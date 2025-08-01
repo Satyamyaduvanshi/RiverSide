@@ -6,7 +6,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { AuthGuard } from '../../guards/auth/auth.guard';
 import * as express from 'express'; 
 import { firstValueFrom } from 'rxjs';
-import { User } from './decorator/user.decorator';
+import { User } from '../../decorator/user.decorator';
 
 @Controller('auth')
 export class AuthController {
