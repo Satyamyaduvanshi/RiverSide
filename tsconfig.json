@@ -17,6 +17,12 @@
     },
     {
       "path": "./apps/studio"
+    },
+    {
+      "path": "./apps/storage-e2e"
+    },
+    {
+      "path": "./apps/storage"
     }
   ]
 }

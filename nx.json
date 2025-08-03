@@ -58,7 +58,9 @@
         "apps/studio-e2e/**/*",
         "recording-e2e/**/*",
         "apps/recording-e2e/**/*",
-        "apps/recording-e2e/**/*"
+        "apps/recording-e2e/**/*",
+        "apps/gateway-e2e/**/*",
+        "apps/storage-e2e/**/*"
       ]
     },
     {
