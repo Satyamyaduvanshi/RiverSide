@@ -3,15 +3,12 @@ import {
   Controller,
   Inject,
   Post,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { StartRecordingDto } from './dto/start-recording.dto';
 import { AuthGuard } from '../../guards/auth/auth.guard';
-import { FileInterceptor } from '@nestjs/platform-express'; 
-import { diskStorage } from 'multer'; 
+import { StopRecordingDto } from './dto/stop-recording.dto';
 
 @Controller('recording')
 export class RecordingController {
@@ -31,30 +28,10 @@ export class RecordingController {
 
   @Post('stop')
   @UseGuards(AuthGuard)
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, `${file.fieldname}-${uniqueSuffix}`);
-        },
-      }),
-    }),
-  )
-  stopRecording(
-    @UploadedFile() file: Express.Multer.File,
-    @Body('recordingId') recordingId: string,
-  ) {
-    const payload = {
-      recordingId: recordingId,
-      filePath: file.path,
-      fileSize: file.size,
-    };
+  stopRecording(@Body() stopRecordingDto: StopRecordingDto) {
     return this.recordingServiceClient.send(
       { cmd: 'stop_recording' },
-      payload,
+      stopRecordingDto,
     );
   }
 }

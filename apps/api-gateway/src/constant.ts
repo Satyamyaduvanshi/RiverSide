@@ -6,4 +6,5 @@ export const MICROSERVICE ={
     user:"USER_SERVICE",
     studio:"STUDIO_SERVICE",
     recording:'RECORDING_SERVICE',
+    storage:'STORAGE_SERVICE'
 }
