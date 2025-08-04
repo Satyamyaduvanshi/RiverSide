@@ -19,10 +19,13 @@
       "path": "./apps/studio"
     },
     {
-      "path": "./apps/storage-e2e"
+      "path": "./apps/storage"
     },
     {
-      "path": "./apps/storage"
+      "path": "./frontend"
+    },
+    {
+      "path": "./apps/frontend"
     }
   ]
 }
