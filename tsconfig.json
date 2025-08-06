@@ -22,9 +22,6 @@
       "path": "./apps/storage"
     },
     {
-      "path": "./frontend"
-    },
-    {
       "path": "./apps/frontend"
     }
   ]
