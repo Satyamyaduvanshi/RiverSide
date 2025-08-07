@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import {
   Card,
   CardContent,
@@ -9,51 +9,29 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from './ui/card';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+} from '../ui//card';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
-export function SignUpForm() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // We will add the API call logic here in the next step
-    console.log({ firstName, lastName, email, password });
+    // We will add the API call logic in a moment
+    console.log({ email, password });
   };
 
   return (
     <Card className="w-[350px]">
       <CardHeader>
-        <CardTitle>Create an Account</CardTitle>
-        <CardDescription>
-          Sign up to start recording your podcasts.
-        </CardDescription>
+        <CardTitle>Welcome Back</CardTitle>
+        <CardDescription>Log in to access your account.</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent>
           <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                placeholder="Your first name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                placeholder="Your last name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -78,7 +56,7 @@ export function SignUpForm() {
         </CardContent>
         <CardFooter>
           <Button type="submit" className="w-full">
-            Sign Up
+            Log In
           </Button>
         </CardFooter>
       </form>
