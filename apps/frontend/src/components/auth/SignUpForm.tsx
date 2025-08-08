@@ -13,16 +13,20 @@ import {
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { api } from '../../lib/api';
+import { useAuthStore } from '../../stores/authStore';
+import { useRouter } from 'next/navigation';
 
 export function SignUpForm() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  // Add state for loading and errors
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const setUser = useAuthStore((state) => state.setUser);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,19 +34,24 @@ export function SignUpForm() {
     setError('');
 
     try {
-      const response = await api.post('/auth/signup', {
+      // Step 1: Create the user account
+      await api.post('/auth/signup', {
         firstName,
         lastName,
         email,
         password,
       });
 
-      console.log('Sign up successful:', response.data);
-      // We will handle redirecting the user later
-      
+      // Step 2: Automatically log the new user in
+      const loginResponse = await api.post('/auth/login', { email, password });
+      const { user } = loginResponse.data;
+
+      // Step 3: Save user to global state
+      setUser(user);
+
+      // Step 4: Redirect to the dashboard
+      router.push('/dashboard');
     } catch (err: any) {
-      console.error('Sign up failed:', err);
-      // Set an error message to display to the user
       setError(err.response?.data?.message || 'An unexpected error occurred.');
     } finally {
       setIsLoading(false);
@@ -65,7 +74,6 @@ export function SignUpForm() {
             </div>
           )}
           <div className="grid w-full items-center gap-4">
-            {/* Input fields remain the same */}
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="firstName">First Name</Label>
               <Input
@@ -112,7 +120,7 @@ export function SignUpForm() {
         </CardContent>
         <CardFooter>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Signing Up...' : 'Sign Up'}
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Button>
         </CardFooter>
       </form>

@@ -12,15 +12,38 @@ import {
 } from '../ui//card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { useRouter } from 'next/navigation';
+
+import { useAuthStore } from '../../stores/authStore';
+import { api } from '../../lib/api';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const setUser = useAuthStore((state) => state.setUser);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // We will add the API call logic in a moment
-    console.log({ email, password });
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { user } = response.data;
+
+      // Save user to global state
+      setUser(user);
+
+      // Redirect to dashboard
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -31,6 +54,11 @@ export function LoginForm() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent>
+          {error && (
+            <div className="mb-4 rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="email">Email</Label>
@@ -40,6 +68,7 @@ export function LoginForm() {
                 placeholder="Your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="flex flex-col space-y-1.5">
@@ -50,13 +79,14 @@ export function LoginForm() {
                 placeholder="Your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
               />
             </div>
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full">
-            Log In
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Logging In...' : 'Log In'}
           </Button>
         </CardFooter>
       </form>
