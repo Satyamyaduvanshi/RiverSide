@@ -23,6 +23,12 @@
     },
     {
       "path": "./apps/frontend"
+    },
+    {
+      "path": "./apps/recording"
+    },
+    {
+      "path": "./apps/gateway"
     }
   ]
 }
