@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-//todo: cors error fix it 
+//todo: cors error fix i
 
 export const api = axios.create({
   baseURL: 'http://localhost:3000/api/', // The URL of your API Gateway
