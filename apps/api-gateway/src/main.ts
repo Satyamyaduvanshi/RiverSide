@@ -20,6 +20,15 @@ async function bootstrap() {
       transform:true
     })
   )
+
+ const corsOptions = {
+    origin: 'http://localhost:4200',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  };
+
+  app.enableCors(corsOptions)
+
   app.use(cookieParser())
   await app.listen(port);
   Logger.log(
