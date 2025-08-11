@@ -24,6 +24,11 @@ export class StudioGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log(`client disconnect: ${client.id}`)
+    client.rooms.forEach((room)=>{
+      if(room != client.id){
+        client.to(room).emit('user-left',{ userId: client.id })
+      }
+    })
   }
 
   @SubscribeMessage('join-studio')

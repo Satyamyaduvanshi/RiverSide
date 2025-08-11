@@ -20,7 +20,8 @@ export function CreateStudioForm() {
       const response = await api.post('/studio/create-studio', { title });
       // Redirect to the new studio page (we will build this later)
       // router.push(`/studio/${response.data.id}`);
-      alert(`Studio created! ID: ${response.data.id}`);
+      router.push(`/studio/${response.data.id}`)
+      //alert(`Studio created! ID: ${response.data.id}`);
     } catch (error) {
       console.error('Failed to create studio', error);
       alert('Failed to create studio.');
