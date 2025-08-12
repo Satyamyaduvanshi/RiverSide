@@ -41,5 +41,31 @@ export class StudioGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`Client ${client.id} joined ${studioId}`);
 
   }
+
+  @SubscribeMessage('webrtc-offer')
+  handleOffer(client: Socket, payload: { to: string; offer: any }): void {
+    client.to(payload.to).emit('webrtc-offer', {
+      from: client.id,
+      offer: payload.offer,
+    });
+  }
+
+  // Add this handler for WebRTC answers
+  @SubscribeMessage('webrtc-answer')
+  handleAnswer(client: Socket, payload: { to: string; answer: any }): void {
+    client.to(payload.to).emit('webrtc-answer', {
+      from: client.id,
+      answer: payload.answer,
+    });
+  }
+
+  // Add this handler for WebRTC ICE candidates
+  @SubscribeMessage('webrtc-ice-candidate')
+  handleIceCandidate(client: Socket, payload: { to: string; candidate: any }): void {
+    client.to(payload.to).emit('webrtc-ice-candidate', {
+      from: client.id,
+      candidate: payload.candidate,
+    });
+  }
 }
 

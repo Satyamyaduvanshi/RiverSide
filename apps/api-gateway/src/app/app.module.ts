@@ -39,12 +39,18 @@ import { StorageController } from './storage/storage.controller';
     {
       name: MICROSERVICE.recording, 
       transport: Transport.TCP,
-      options: { host: 'localhost', port: 3004 },
+      options: { 
+        host: 'localhost',
+        port: 3004 
+      },
     },
     {
       name: MICROSERVICE.storage, 
       transport: Transport.TCP,
-      options: { host: 'localhost', port: 4005 },
+      options: { 
+        host: 'localhost', 
+        port: 3005 
+      },
     },
 ]),
 //StorageModule
