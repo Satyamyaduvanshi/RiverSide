@@ -30,7 +30,7 @@ export function VideoPlayer({
   }, [stream]);
 
   return (
-    <div className="relative bg-black rounded-md overflow-hidden">
+    <div className="relative bg-pink-500 rounded-md overflow-hidden">
       <video
         ref={videoRef}
         autoPlay

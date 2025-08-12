@@ -25,4 +25,25 @@ export class AppService {
       }
     })
   }
+
+  async joinStudio(studioId: string, userId: string) {
+  // Find or create a participant record for this user in this studio
+  return this.prisma.participant.upsert({
+    where: {
+      userId_studioId: { // This compound key was defined in our schema
+        userId,
+        studioId,
+      },
+    },
+    update: {}, // Nothing to update if they already exist
+    create: {
+      userId,
+      studioId,
+      role: 'GUEST', // We could add logic later to make the owner a HOST
+    },
+  });
+}
+
+
+
 }
