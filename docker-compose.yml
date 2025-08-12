@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # -- CACHING --
+  redis:
+    image: redis:7-alpine
+    restart: always
+
+  # -- BACKEND MICROSERVICES --
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile
+      args:
+        SERVICE_NAME: auth
+    restart: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      REFRESH_JWT_SECRET: ${REFRESH_JWT_SECRET}
+      JWT_EXPIRESIN: ${JWT_EXPIRESIN}
+      REFRESH_JWT_EXPIRESIN: ${REFRESH_JWT_EXPIRESIN}
+
+  user:
+    build:
+      context: .
+      dockerfile: apps/user/Dockerfile
+      args:
+        SERVICE_NAME: user
+    restart: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+
+  studio:
+    build:
+      context: .
+      dockerfile: apps/studio/Dockerfile
+      args:
+        SERVICE_NAME: studio
+    restart: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+
+  recording:
+    build:
+      context: .
+      dockerfile: apps/recording/Dockerfile
+      args:
+        SERVICE_NAME: recording
+    restart: always
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+
+  storage:
+    build:
+      context: .
+      dockerfile: apps/storage/Dockerfile
+      args:
+        SERVICE_NAME: storage
+    restart: always
+    environment:
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_REGION: ${S3_REGION}
+
+  # -- GATEWAYS --
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+      args:
+        SERVICE_NAME: api-gateway
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth
+      - user
+      - studio
+      - recording
+      - storage
+    environment:
+      AUTH_SERVICE_HOST: auth
+      USER_SERVICE_HOST: user
+      STUDIO_SERVICE_HOST: studio
+      RECORDING_SERVICE_HOST: recording
+      STORAGE_SERVICE_HOST: storage
+
+  gateway: # WebSocket Gateway
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+      args:
+        SERVICE_NAME: gateway
+    restart: always
+    ports:
+      - "3006:3006"
+    depends_on:
+      - redis
+
+  # -- FRONTEND --
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    restart: always
+    ports:
+      - "4200:4200"
+    depends_on:
+      - api-gateway
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_WS_URL: http://localhost:3006
