@@ -9,7 +9,7 @@ import { AppModule } from './app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3005);
+  await app.listen(3006);
   Logger.log(
     `🚀 websocket gateway service running on port:3005`
   );

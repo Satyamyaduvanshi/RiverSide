@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Inject, Param, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { MICROSERVICE } from '../../constant';
 import { AuthGuard } from '../../guards/auth/auth.guard';
@@ -25,5 +25,15 @@ export class StudioController {
     };
 
     return this.studioService.send({ cmd: 'studio-createStudio' }, payload);
+  }
+
+  @Post(':id/join')
+  @UseGuards(AuthGuard)
+  joinStudio(@Param('id') studioId: string, @User() user:{userId:string}) {
+    const userId = user.userId;
+    return this.studioService.send(
+      { cmd: 'join_studio' },
+      { studioId, userId },
+    );
   }
 }

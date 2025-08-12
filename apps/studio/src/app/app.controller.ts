@@ -11,4 +11,9 @@ export class AppController {
   async createStudio(@Payload() data:{ownerId:string,studioData:CreateStudioDto}){
     return this.appService.createStudio(data.studioData,data.ownerId)
   }
+
+  @MessagePattern({ cmd: 'join_studio' })
+  joinStudio(@Payload() data: { studioId: string; userId: string }) {
+  return this.appService.joinStudio(data.studioId, data.userId);
+  }
 }
