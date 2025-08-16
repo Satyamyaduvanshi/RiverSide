@@ -30,7 +30,7 @@ export function VideoPlayer({
   }, [stream]);
 
   return (
-    <div className="relative bg-pink-500 rounded-md overflow-hidden">
+    <div className="relative bg-black rounded-md overflow-hidden">
       <video
         ref={videoRef}
         autoPlay
@@ -40,10 +40,10 @@ export function VideoPlayer({
       {/* Show controls only for the local player */}
       {isLocalPlayer && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-          <Button onClick={toggleMute} variant={isMuted ? 'destructive' : 'secondary'} size="icon">
+          <Button onClick={toggleMute} variant={isMuted ? 'destructive' : 'secondary'} size="icon" className='text-white'>
             {isMuted ? <MicOff /> : <Mic />}
           </Button>
-          <Button onClick={toggleVideo} variant={isVideoOff ? 'destructive' : 'secondary'} size="icon">
+          <Button onClick={toggleVideo} variant={isVideoOff ? 'destructive' : 'secondary'} size="icon" className='text-white'>
             {isVideoOff ? <VideoOff /> : <Video />}
           </Button>
         </div>
