@@ -147,7 +147,7 @@ export default function StudioPage() {
   };
 
   return (
-    
+
     <div className="p-8">
       <h1 className="text-2xl font-bold">Studio Session</h1>
       <div className="flex items-center gap-4 my-4">
