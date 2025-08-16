@@ -67,6 +67,8 @@ export default function StudioPage() {
       socket.on('connect', () => socket.emit('join-studio', { studioId }));
       socket.on('user-joined', async ({ userId }) => {
         const pc = createPeerConnection(userId);
+
+
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         socket.emit('webrtc-offer', { to: userId, offer });
@@ -95,7 +97,7 @@ export default function StudioPage() {
           return newMap;
         });
 
-        
+
       });
 
       return () => {
