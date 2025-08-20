@@ -30,7 +30,7 @@ export class AppService {
   // Find or create a participant record for this user in this studio
   return this.prisma.participant.upsert({
     where: {
-      userId_studioId: { // This compound key was defined in our schema
+      studioId_userId: { // This compound key was defined in our schema
         userId,
         studioId,
       },

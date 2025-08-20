@@ -3,16 +3,22 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
-import { useAuthStore } from '../../../stores/authStore';
-import { useUserMedia } from '../../../hooks/useUserMedia';
-import { VideoPlayer } from '../../../components/studio/VideoPlayer';
-import { Button } from '../../../components/ui/button';
-import { api } from '../../../lib/api';
+import { useAuthStore } from '@/stores/authStore';
+import { useUserMedia } from '@/hooks/useUserMedia';
+import { VideoPlayer } from '@/components/studio/VideoPlayer';
+import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy } from 'lucide-react';
 
-
+// --- TYPE DEFINITIONS ---
 interface Participant {
   id: string;
   userId: string;
+}
+
+interface RemotePeer {
+  socketId: string;
+  stream: MediaStream;
 }
 
 export default function StudioPage() {
@@ -22,7 +28,7 @@ export default function StudioPage() {
   const { stream: localStream, isMuted, isVideoOff, toggleMute, toggleVideo } = useUserMedia();
 
   const [participant, setParticipant] = useState<Participant | null>(null);
-  const [remoteStreams, setRemoteStreams] = useState<Map<string, MediaStream>>(new Map());
+  const [remotePeers, setRemotePeers] = useState<RemotePeer[]>([]);
   const [isRecording, setIsRecording] = useState(false);
 
   const socketRef = useRef<Socket | null>(null);
@@ -31,7 +37,9 @@ export default function StudioPage() {
   const recordedChunksRef = useRef<Blob[]>([]);
   const activeRecordingIdRef = useRef<string | null>(null);
 
-  // Effect 1: Join the studio as a participant via HTTP
+  // --- EFFECT 1: JOIN STUDIO VIA HTTP ---
+  // This effect runs when the user's auth state is known. Its only job is to
+  // create the official "Participant" record in the database.
   useEffect(() => {
     if (user && studioId) {
       console.log('Attempting to join studio via API...');
@@ -44,33 +52,52 @@ export default function StudioPage() {
     }
   }, [studioId, user]);
 
-  // Effect 2: Set up WebRTC and WebSockets once we have a stream and are a participant
+  // --- EFFECT 2: INITIALIZE WEBSOCKETS & WEBRTC ---
+  // This effect runs only after we have the local media stream and have successfully
+  // joined the studio (i.e., we have a participant ID).
   useEffect(() => {
     if (localStream && participant) {
       console.log('Initializing WebSockets and WebRTC...');
       const socket = io('http://localhost:3005');
       socketRef.current = socket;
 
+      // =================================================================
+      // WEB RTC EXPLANATION: The Handshake
+      // WebRTC allows browsers to stream video directly to each other (peer-to-peer).
+      // To start, they need a central server (our WebSocket Gateway) to act as a
+      // "matchmaker" to exchange connection info. This is called SIGNALING.
+      // 1. User A sends an "offer" to talk.
+      // 2. User B receives it and sends back an "answer".
+      // 3. They exchange network details ("ICE candidates") to find the best path.
+      // 4. They connect directly.
+      // =================================================================
+
       const createPeerConnection = (peerSocketId: string): RTCPeerConnection => {
         const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        
         pc.ontrack = (event) => {
-          setRemoteStreams((prev) => new Map(prev).set(peerSocketId, event.streams[0]));
+          setRemotePeers((prev) => [...prev.filter(p => p.socketId !== peerSocketId), { socketId: peerSocketId, stream: event.streams[0] }]);
         };
+        
         localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
+        
         pc.onicecandidate = (event) => {
           if (event.candidate) socket.emit('webrtc-ice-candidate', { to: peerSocketId, candidate: event.candidate });
         };
+        
         peerConnectionsRef.current.set(peerSocketId, pc);
         return pc;
       };
 
       socket.on('connect', () => socket.emit('join-studio', { studioId }));
+
       socket.on('user-joined', async ({ userId }) => {
         const pc = createPeerConnection(userId);
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         socket.emit('webrtc-offer', { to: userId, offer });
       });
+
       socket.on('webrtc-offer', async ({ from, offer }) => {
         const pc = createPeerConnection(from);
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -78,24 +105,21 @@ export default function StudioPage() {
         await pc.setLocalDescription(answer);
         socket.emit('webrtc-answer', { to: from, answer });
       });
+
       socket.on('webrtc-answer', async ({ from, answer }) => {
         const pc = peerConnectionsRef.current.get(from);
         if (pc) await pc.setRemoteDescription(new RTCSessionDescription(answer));
       });
+
       socket.on('webrtc-ice-candidate', ({ from, candidate }) => {
         const pc = peerConnectionsRef.current.get(from);
         if (pc) pc.addIceCandidate(new RTCIceCandidate(candidate));
       });
+
       socket.on('user-left', ({ userId }) => {
         peerConnectionsRef.current.get(userId)?.close();
         peerConnectionsRef.current.delete(userId);
-        setRemoteStreams((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(userId);
-          return newMap;
-        });
-
-
+        setRemotePeers((prev) => prev.filter(p => p.socketId !== userId));
       });
 
       return () => {
@@ -116,6 +140,7 @@ export default function StudioPage() {
         fileType: 'video',
       });
       activeRecordingIdRef.current = response.data.id;
+
       mediaRecorderRef.current = new MediaRecorder(localStream);
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) recordedChunksRef.current.push(event.data);
@@ -148,29 +173,70 @@ export default function StudioPage() {
     }
   };
 
-  return (
+  const copyInviteLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Invite link copied to clipboard!');
+  };
 
-    <div className="p-8">
-      <h1 className="text-2xl font-bold">Studio Session</h1>
-      <div className="flex items-center gap-4 my-4">
-        {!isRecording ? (
-          <Button onClick={handleStartRecording} disabled={!localStream || !participant}>Start Recording</Button>
-        ) : (
-          <Button onClick={handleStopRecording} variant="destructive">Stop Recording</Button>
-        )}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
-        <div>
-          <h2 className="font-semibold mb-2">{user?.name || 'You'}</h2>
-          <VideoPlayer stream={localStream} isLocalPlayer={true} isMuted={isMuted} isVideoOff={isVideoOff} toggleMute={toggleMute} toggleVideo={toggleVideo} />
-        </div>
-        {Array.from(remoteStreams.entries()).map(([socketId, stream]) => (
-          <div key={socketId}>
-            <h2 className="font-semibold mb-2">Participant {socketId.substring(0, 5)}</h2>
-            <VideoPlayer stream={stream} />
+  return (
+    <div className="flex h-screen bg-gray-900 text-white">
+      <main className="flex-1 flex flex-col p-4">
+        <header className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Studio Session</h1>
+          <Button onClick={copyInviteLink} variant="secondary">
+            <Copy className="mr-2 h-4 w-4" /> Copy Invite Link
+          </Button>
+        </header>
+
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <VideoPlayer
+              stream={localStream}
+              isLocalPlayer={true}
+              isMuted={isMuted}
+              isVideoOff={isVideoOff}
+            />
+            <div className="absolute bottom-2 left-2 bg-black/50 p-1 rounded-md text-sm">
+              {user?.name || 'You'}
+            </div>
           </div>
-        ))}
-      </div>
+
+          {remotePeers.map((peer) => (
+            <div key={peer.socketId} className="relative">
+              <VideoPlayer stream={peer.stream} />
+              <div className="absolute bottom-2 left-2 bg-black/50 p-1 rounded-md text-sm">
+                Participant {peer.socketId.substring(0, 5)}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <footer className="mt-4 h-20 bg-gray-800 rounded-lg flex items-center justify-center gap-4">
+          <Button onClick={toggleMute} variant={isMuted ? 'destructive' : 'secondary'} size="lg">
+            {isMuted ? <MicOff /> : <Mic />}
+            <span className="ml-2">{isMuted ? 'Unmute' : 'Mute'}</span>
+          </Button>
+          <Button onClick={toggleVideo} variant={isVideoOff ? 'destructive' : 'secondary'} size="lg">
+            {isVideoOff ? <VideoOff /> : <Video />}
+            <span className="ml-2">{isVideoOff ? 'Start Video' : 'Stop Video'}</span>
+          </Button>
+
+          {!isRecording ? (
+            <Button onClick={handleStartRecording} disabled={!localStream || !participant} size="lg" className="bg-green-600 hover:bg-green-700">
+              Start Recording
+            </Button>
+          ) : (
+            <Button onClick={handleStopRecording} variant="destructive" size="lg">
+              Stop Recording
+            </Button>
+          )}
+
+           <Button variant="destructive" size="lg">
+            <PhoneOff />
+            <span className="ml-2">Leave</span>
+          </Button>
+        </footer>
+      </main>
     </div>
   );
 }

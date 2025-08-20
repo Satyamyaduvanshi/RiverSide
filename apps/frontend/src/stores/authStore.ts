@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 
-interface User {
+export interface User {
   id: string;
   name: string;
 }
 
-interface AuthState {
+export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   setUser: (user: User | null) => void;
