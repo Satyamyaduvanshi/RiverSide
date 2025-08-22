@@ -2,3 +2,5 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'frontend'
+  - 'admin'
+  - 'admin-e2e'

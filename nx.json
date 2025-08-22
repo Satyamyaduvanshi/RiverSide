@@ -60,7 +60,9 @@
         "apps/recording-e2e/**/*",
         "apps/recording-e2e/**/*",
         "apps/gateway-e2e/**/*",
-        "apps/storage-e2e/**/*"
+        "apps/storage-e2e/**/*",
+        "admin-e2e/**/*",
+        "apps/admin-e2e/**/*"
       ]
     },
     {

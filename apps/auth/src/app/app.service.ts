@@ -134,12 +134,29 @@ export class AppService {
     }
   }
 
-  async validateToken(token:string){
+  // async validateToken(token:string){
+  //   try {
+  //      const decode:authJwtPayload = this.jwtService.verify(token)
+  //      return {valid: true , userId: decode.sub}
+  //   } catch (err) {
+  //     return { valid:false, userId: null}
+  //   }
+  // }
+
+  async validateToken(token: string) {
     try {
-       const decode:authJwtPayload = this.jwtService.verify(token)
-       return {valid: true , userId: decode.sub}
+      const decoded: authJwtPayload = this.jwtService.verify(token);
+      if (!decoded.sub) {
+        return { valid: false, userId: null, role: null };
+      }
+      const user = await this.findById(decoded.sub);
+      if (!user) {
+        return { valid: false, userId: null, role: null };
+      }
+      return { valid: true, userId: user.id, role: user.role };
+      
     } catch (err) {
-      return { valid:false, userId: null}
+      return { valid: false, userId: null, role: null };
     }
   }
 

@@ -67,5 +67,14 @@ export class StudioGateway implements OnGatewayConnection, OnGatewayDisconnect {
       candidate: payload.candidate,
     });
   }
+
+  @SubscribeMessage('send-chat-message')
+  handleChat(client:Socket, payload:{studioId:string, message:string,sender:string}):void{
+    client.to(payload.studioId).emit('new-chat-message',{
+      message: payload.message,
+      sender: payload.sender,
+      socketId: client.id
+    })
+  }
 }
 

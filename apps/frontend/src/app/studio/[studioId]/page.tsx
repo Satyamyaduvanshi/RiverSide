@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { ChatBox } from '../../../components/studio/ChatBox';
 import { useParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
-import { useAuthStore } from '@/stores/authStore';
-import { useUserMedia } from '@/hooks/useUserMedia';
-import { VideoPlayer } from '@/components/studio/VideoPlayer';
-import { Button } from '@/components/ui/button';
-import { api } from '@/lib/api';
+import { useAuthStore } from '../../../stores/authStore';
+import { useUserMedia } from '../../../hooks/useUserMedia';
+import { VideoPlayer } from  '../../../components/studio/VideoPlayer';
+import { Button } from '../../../components/ui/button';
+import { api } from '../../../lib/api';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy } from 'lucide-react';
 
 // --- TYPE DEFINITIONS ---
@@ -237,6 +238,10 @@ export default function StudioPage() {
           </Button>
         </footer>
       </main>
+
+      <aside className='w-8 bg-gray-950 p-4 border-l border-gray-700'>
+        <ChatBox socket={socketRef.current} studioId={studioId}/>
+      </aside>
     </div>
   );
 }

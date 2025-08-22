@@ -17,6 +17,7 @@ datasource db {
 
 model User {
   id           String        @id @default(uuid())
+  role         UserRole      @default(USER)
   email        String        @unique
   password     String
   firstName    String
@@ -90,4 +91,9 @@ enum StudioStatus {
   ACTIVE
   ENDED
   SCHEDULED
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
