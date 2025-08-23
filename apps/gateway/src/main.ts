@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+//import { AppModule } from './app.module';
+import { AppModule } from './app/app.module';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
 import { IoAdapter } from '@nestjs/platform-socket.io';

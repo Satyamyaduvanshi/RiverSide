@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import {
   Card,
@@ -9,20 +10,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../ui//card';
+} from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { useRouter } from 'next/navigation';
-
-import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../lib/api';
+import { useAuthContext } from './AuthProvider'; // <-- Corrected import
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const setUser = useAuthStore((state) => state.setUser);
+  const setUser = useAuthContext((state) => state.setUser); // <-- Use the new hook
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { createStore } from 'zustand';
 
 export interface User {
   id: string;
@@ -11,8 +11,10 @@ export interface AuthState {
   setUser: (user: User | null) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-}));
+export const createAuthStore = (initialState: Partial<AuthState> = {}) => {
+  return createStore<AuthState>((set) => ({
+    user: initialState.user || null,
+    isAuthenticated: !!initialState.user,
+    setUser: (user) => set({ user, isAuthenticated: !!user }),
+  }));
+};

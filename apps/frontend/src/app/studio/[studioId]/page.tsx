@@ -1,17 +1,16 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { ChatBox } from '../../../components/studio/ChatBox';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
-import { useAuthStore } from '../../../stores/authStore';
+import { useAuthContext } from '../../../components/auth/AuthProvider';
 import { useUserMedia } from '../../../hooks/useUserMedia';
-import { VideoPlayer } from  '../../../components/studio/VideoPlayer';
+import { VideoPlayer } from '../../../components/studio/VideoPlayer';
 import { Button } from '../../../components/ui/button';
 import { api } from '../../../lib/api';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Copy } from 'lucide-react';
+import { ChatBox } from '../../../components/studio/ChatBox';
 
-// --- TYPE DEFINITIONS ---
 interface Participant {
   id: string;
   userId: string;
@@ -24,107 +23,85 @@ interface RemotePeer {
 
 export default function StudioPage() {
   const params = useParams();
+  const router = useRouter();
   const studioId = params.studioId as string;
-  const { user } = useAuthStore();
+  const user = useAuthContext((state) => state.user);
   const { stream: localStream, isMuted, isVideoOff, toggleMute, toggleVideo } = useUserMedia();
 
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [remotePeers, setRemotePeers] = useState<RemotePeer[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
-  const socketRef = useRef<Socket | null>(null);
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const activeRecordingIdRef = useRef<string | null>(null);
 
-  // --- EFFECT 1: JOIN STUDIO VIA HTTP ---
-  // This effect runs when the user's auth state is known. Its only job is to
-  // create the official "Participant" record in the database.
   useEffect(() => {
+
+    console.log("user inside studio page : ", user)
     if (user && studioId) {
-      console.log('Attempting to join studio via API...');
+
+      console.log("inside the user and studioId useeffect")
       api.post(`/studio/${studioId}/join`)
         .then(response => {
-          console.log('Successfully joined studio:', response.data);
           setParticipant(response.data);
         })
         .catch(error => console.error('Failed to join studio via API', error));
     }
   }, [studioId, user]);
 
-  // --- EFFECT 2: INITIALIZE WEBSOCKETS & WEBRTC ---
-  // This effect runs only after we have the local media stream and have successfully
-  // joined the studio (i.e., we have a participant ID).
   useEffect(() => {
     if (localStream && participant) {
-      console.log('Initializing WebSockets and WebRTC...');
-      const socket = io('http://localhost:3005');
-      socketRef.current = socket;
 
-      // =================================================================
-      // WEB RTC EXPLANATION: The Handshake
-      // WebRTC allows browsers to stream video directly to each other (peer-to-peer).
-      // To start, they need a central server (our WebSocket Gateway) to act as a
-      // "matchmaker" to exchange connection info. This is called SIGNALING.
-      // 1. User A sends an "offer" to talk.
-      // 2. User B receives it and sends back an "answer".
-      // 3. They exchange network details ("ICE candidates") to find the best path.
-      // 4. They connect directly.
-      // =================================================================
+      console.log("starting socket")
+      const newSocket = io('http://localhost:3005');
+      setSocket(newSocket);
 
       const createPeerConnection = (peerSocketId: string): RTCPeerConnection => {
         const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-        
         pc.ontrack = (event) => {
           setRemotePeers((prev) => [...prev.filter(p => p.socketId !== peerSocketId), { socketId: peerSocketId, stream: event.streams[0] }]);
         };
-        
         localStream.getTracks().forEach((track) => pc.addTrack(track, localStream));
-        
         pc.onicecandidate = (event) => {
-          if (event.candidate) socket.emit('webrtc-ice-candidate', { to: peerSocketId, candidate: event.candidate });
+          if (event.candidate) newSocket.emit('webrtc-ice-candidate', { to: peerSocketId, candidate: event.candidate });
         };
-        
         peerConnectionsRef.current.set(peerSocketId, pc);
         return pc;
       };
 
-      socket.on('connect', () => socket.emit('join-studio', { studioId }));
-
-      socket.on('user-joined', async ({ userId }) => {
+      newSocket.on('connect', () => newSocket.emit('join-studio', { studioId }));
+      newSocket.on('user-joined', async ({ userId }) => {
         const pc = createPeerConnection(userId);
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
-        socket.emit('webrtc-offer', { to: userId, offer });
+        newSocket.emit('webrtc-offer', { to: userId, offer });
       });
-
-      socket.on('webrtc-offer', async ({ from, offer }) => {
+      newSocket.on('webrtc-offer', async ({ from, offer }) => {
         const pc = createPeerConnection(from);
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-        socket.emit('webrtc-answer', { to: from, answer });
+        newSocket.emit('webrtc-answer', { to: from, answer });
       });
-
-      socket.on('webrtc-answer', async ({ from, answer }) => {
+      newSocket.on('webrtc-answer', async ({ from, answer }) => {
         const pc = peerConnectionsRef.current.get(from);
         if (pc) await pc.setRemoteDescription(new RTCSessionDescription(answer));
       });
-
-      socket.on('webrtc-ice-candidate', ({ from, candidate }) => {
+      newSocket.on('webrtc-ice-candidate', ({ from, candidate }) => {
         const pc = peerConnectionsRef.current.get(from);
         if (pc) pc.addIceCandidate(new RTCIceCandidate(candidate));
       });
-
-      socket.on('user-left', ({ userId }) => {
+      newSocket.on('user-left', ({ userId }) => {
         peerConnectionsRef.current.get(userId)?.close();
         peerConnectionsRef.current.delete(userId);
         setRemotePeers((prev) => prev.filter(p => p.socketId !== userId));
       });
 
       return () => {
-        socket.disconnect();
+        newSocket.disconnect();
         peerConnectionsRef.current.forEach(pc => pc.close());
       };
     }
@@ -141,7 +118,6 @@ export default function StudioPage() {
         fileType: 'video',
       });
       activeRecordingIdRef.current = response.data.id;
-
       mediaRecorderRef.current = new MediaRecorder(localStream);
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) recordedChunksRef.current.push(event.data);
@@ -177,6 +153,10 @@ export default function StudioPage() {
   const copyInviteLink = () => {
     navigator.clipboard.writeText(window.location.href);
     alert('Invite link copied to clipboard!');
+  };
+
+  const handleLeave = () => {
+    router.push('/dashboard');
   };
 
   return (
@@ -232,15 +212,15 @@ export default function StudioPage() {
             </Button>
           )}
 
-           <Button variant="destructive" size="lg">
+           <Button onClick={handleLeave} variant="destructive" size="lg">
             <PhoneOff />
             <span className="ml-2">Leave</span>
           </Button>
         </footer>
       </main>
 
-      <aside className='w-8 bg-gray-950 p-4 border-l border-gray-700'>
-        <ChatBox socket={socketRef.current} studioId={studioId}/>
+      <aside className='w-80 bg-gray-950 p-4 border-l border-gray-700'>
+        {socket && <ChatBox socket={socket} studioId={studioId} />}
       </aside>
     </div>
   );

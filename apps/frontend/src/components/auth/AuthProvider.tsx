@@ -1,30 +1,29 @@
 'use client';
 
-import { useAuthStore } from '../../stores/authStore';
-import { useEffect, useRef } from 'react';
+import { ReactNode, createContext, useContext, useRef } from 'react';
+import { useStore } from 'zustand';
+import { createAuthStore, AuthState, User } from '../../stores/authStore';
 
-interface User {
-  id: string;
-  name: string;
+const AuthStoreContext = createContext<ReturnType<typeof createAuthStore> | null>(null);
+
+export function AuthProvider({ initialUser, children }: { children: ReactNode }) {
+  const storeRef = useRef<ReturnType<typeof createAuthStore>>();
+  if (!storeRef.current) {
+    // Create the store instance only once
+    storeRef.current = createAuthStore({ user: initialUser });
+  }
+
+  return (
+    <AuthStoreContext.Provider value={storeRef.current}>
+      {children}
+    </AuthStoreContext.Provider>
+  );
 }
 
-interface AuthProviderProps {
-  initialUser: User | null;
-  children: React.ReactNode;
-}
-
-export function AuthProvider({ initialUser, children }: AuthProviderProps) {
-  // Use a ref to ensure we only hydrate the store once
-  const hydrated = useRef(false);
-  const { setUser } = useAuthStore();
-
-  useEffect(() => {
-    if (!hydrated.current) {
-      // If the store hasn't been hydrated yet, set the user from the server
-      setUser(initialUser);
-      hydrated.current = true;
-    }
-  }, [initialUser, setUser]);
-
-  return <>{children}</>;
-}
+// did not understant this (read about it)
+// This is the new hook that all your components MUST use to access the auth state.
+export const useAuthContext = <T,>(selector: (state: AuthState) => T): T => {
+  const store = useContext(AuthStoreContext);
+  if (!store) throw new Error('Missing AuthStoreContext.Provider');
+  return useStore(store, selector);
+};
