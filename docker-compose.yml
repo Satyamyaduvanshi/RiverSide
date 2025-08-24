@@ -24,7 +24,7 @@ services:
   user:
     build:
       context: .
-      dockerfile: apps/user/Dockerfile
+      dockerfile: apps/User/Dockerfile 
       args:
         SERVICE_NAME: user
     restart: always

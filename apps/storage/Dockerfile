@@ -10,6 +10,7 @@ ARG SERVICE_NAME
 WORKDIR /usr/src/app
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
 COPY . .
+RUN npm install -g pnpm # <-- Add this line
 RUN npm install -g nx
 RUN nx build ${SERVICE_NAME}
 
@@ -19,7 +20,6 @@ ARG SERVICE_NAME
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/dist/apps/${SERVICE_NAME} .
 COPY --from=dependencies /usr/src/app/node_modules ./node_modules
-# Copy the generated package.json for the service
 COPY --from=builder /usr/src/app/dist/apps/${SERVICE_NAME}/package.json .
 
 CMD ["node", "main.js"]
